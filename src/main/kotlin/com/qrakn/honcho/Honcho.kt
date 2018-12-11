@@ -8,11 +8,14 @@ import java.util.*
 
 class Honcho(val plugin: JavaPlugin) {
 
-    private val adapters: MutableMap<Class<out Any>, CommandTypeAdapter> = HashMap()
-    private val commands: MutableMap<String, Any> = HashMap()
+    private val executor: HonchoExecutor = HonchoExecutor(this)
 
     init {
         registerTypeAdapter(Player::class.java, PlayerTypeAdapter())
+    }
+
+    fun registerCommand(command: Any) {
+        executor.registerCommand(command)
     }
 
     /**
@@ -26,7 +29,7 @@ class Honcho(val plugin: JavaPlugin) {
      * @param adapter the command type adapter
      */
     fun registerTypeAdapter(clazz: Class<out Any>, adapter: CommandTypeAdapter) {
-        adapters.putIfAbsent(clazz, adapter)
+        executor.adapters.putIfAbsent(clazz, adapter)
     }
 
 }
