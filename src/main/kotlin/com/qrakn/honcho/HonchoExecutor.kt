@@ -17,7 +17,7 @@ import java.util.HashMap
 
 internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
 
-    val adapters: MutableMap<Class<out Any>, CommandTypeAdapter> = HashMap()
+    internal val adapters: MutableMap<Class<out Any>, CommandTypeAdapter> = HashMap()
     private val commands: MutableMap<String, CommandBinding> = HashMap()
     private val commandMap: CommandMap = getCommandMap()
 
@@ -32,7 +32,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
         }
 
         val binding = CommandBinding(methods.toTypedArray(), command)
-        for (label in meta.value) {
+        for (label in meta.label) {
             commands[label] = binding
 
             if (commandMap.getCommand(label) == null) {
@@ -82,7 +82,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
             val arguments: MutableList<Any> = arrayListOf(sender)
             if (parameters.size > 1) {
                 for (i in 1..parameters.size) {
-                    val parameter = parameters[i]
+                    val parameter = parameters[i-1]
                     val adapter = adapters[parameter.type]!!
 
                     val translation: Any
