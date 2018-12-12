@@ -42,9 +42,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
 
         if (meta.subcommands) {
             for (clazz in command::class.java.declaredClasses) {
-                if (clazz.superclass == command::class.java) {
-                    registerCommand(clazz.getDeclaredConstructor(command::class.java).newInstance(command))
-                }
+                registerCommand(clazz.getDeclaredConstructor(command::class.java).newInstance(command))
             }
         }
     }

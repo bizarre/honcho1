@@ -25,10 +25,10 @@ open class ExampleCommand {
         player.damage(0.0)
     }
 
-    @CommandMeta(label = ["ver", "version"])
-    inner class ExampleSubCommand : ExampleCommand() {
+    @CommandMeta(label = ["ver", "version", "test"])
+    inner class ExampleSubCommand {
 
-        override fun execute(sender: CommandSender) {
+        fun execute(sender: CommandSender) {
             sender.sendMessage("${ChatColor.RED}honcho v1.0-SNAPSHOT")
         }
 
