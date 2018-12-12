@@ -58,6 +58,10 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
             if (parameters[0].type is Player && sender !is Player) continue
             if (method.declaringClass != instance.javaClass) continue
 
+            if (method.parameterCount - 1 > args.size) {
+                continue
+            }
+
             /**
              * Prioritizes the method that is exact type of sender + lowest argument count
              */
@@ -80,20 +84,18 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
             }
 
             val arguments: MutableList<Any> = arrayListOf(sender)
-            if (parameters.size > 1) {
-                for (i in 1..parameters.size) {
-                    val parameter = parameters[i-1]
-                    val adapter = adapters[parameter.type]!!
+            for (i in 1 until parameters.size) {
+                val parameter = parameters[i]
+                val adapter = adapters[parameter.type]!!
 
-                    val translation: Any
-                    if (i == parameters.lastIndex) {
-                        translation = adapter.convert(StringUtils.join(args, " ", i - 1, args.size), parameter.type)
-                    } else {
-                        translation = adapter.convert(args[i - 1], parameter.type)
-                    }
-
-                    arguments.add(translation)
+                val translation: Any
+                translation = if (i == parameters.lastIndex) {
+                    adapter.convert(StringUtils.join(args, " ", i - 1, args.size), parameter.type)
+                } else {
+                    adapter.convert(args[i - 1], parameter.type)
                 }
+
+                arguments.add(translation)
             }
 
             if (arguments.size == parameters.size) {

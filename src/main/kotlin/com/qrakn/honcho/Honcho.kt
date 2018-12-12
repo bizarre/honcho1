@@ -4,7 +4,6 @@ import com.qrakn.honcho.command.adapter.CommandTypeAdapter
 import com.qrakn.honcho.command.adapter.impl.PlayerTypeAdapter
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
-import java.util.*
 
 class Honcho(val plugin: JavaPlugin) {
 
