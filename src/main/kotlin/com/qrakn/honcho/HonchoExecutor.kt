@@ -18,7 +18,7 @@ import java.util.HashMap
 internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
 
     internal val adapters: MutableMap<Class<out Any>, CommandTypeAdapter> = HashMap()
-    private val commands: MutableMap<String, CommandBinding> = HashMap()
+    internal val commands: MutableMap<String, CommandBinding> = HashMap()
     private val commandMap: CommandMap = getCommandMap()
 
     fun registerCommand(command: Any) {
@@ -32,11 +32,19 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
         }
 
         val binding = CommandBinding(methods.toTypedArray(), command)
-        for (label in meta.label) {
+        for (label in HonchoCommand.getHierarchicalLabel(command.javaClass, ArrayList())) {
             commands[label] = binding
 
             if (commandMap.getCommand(label) == null) {
                 commandMap.register(honcho.plugin.name, HonchoCommand(label, this))
+            }
+        }
+
+        if (meta.subcommands) {
+            for (clazz in command::class.java.declaredClasses) {
+                if (clazz.superclass == command::class.java) {
+                    registerCommand(clazz.getDeclaredConstructor(command::class.java).newInstance(command))
+                }
             }
         }
     }
@@ -83,12 +91,12 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
                 }
             }
 
-            val arguments: MutableList<Any> = arrayListOf(sender)
+            val arguments: MutableList<Any?> = arrayListOf(sender)
             for (i in 1 until parameters.size) {
                 val parameter = parameters[i]
                 val adapter = adapters[parameter.type]!!
 
-                val translation: Any
+                val translation: Any?
                 translation = if (i == parameters.lastIndex) {
                     adapter.convert(StringUtils.join(args, " ", i - 1, args.size), parameter.type)
                 } else {
@@ -126,6 +134,6 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
         throw NullPointerException()
     }
 
-    private inner class CommandBinding(val methods: Array<Method>, val command: Any)
+    internal inner class CommandBinding(val methods: Array<Method>, val command: Any)
 
 }
