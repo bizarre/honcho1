@@ -5,17 +5,13 @@ import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-@CommandMeta(label = ["example"], subcommands = true)
+@CommandMeta(label = ["example"], description = "Example command", subcommands = true)
 open class ExampleCommand {
-
-    open fun execute(sender: CommandSender) {
-        sender.sendMessage("Hello!")
-    }
 
     fun execute(sender: CommandSender, player: Player?) {
 
         if (player == null) {
-            sender.sendMessage("${ChatColor.RED}Player not found")
+            sender.sendMessage("${ChatColor.RED}Player not found.")
             return
         }
 
@@ -25,8 +21,8 @@ open class ExampleCommand {
         player.damage(0.0)
     }
 
-    @CommandMeta(label = ["ver", "version", "test"])
-    inner class ExampleSubCommand {
+    @CommandMeta(label = ["ver", "version"], description = "Displays honcho version")
+    inner class ExampleSubCommand : ExampleCommand() {
 
         fun execute(sender: CommandSender) {
             sender.sendMessage("${ChatColor.RED}honcho v1.0-SNAPSHOT")

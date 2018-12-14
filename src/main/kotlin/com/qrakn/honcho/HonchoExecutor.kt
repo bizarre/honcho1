@@ -1,9 +1,11 @@
 package com.qrakn.honcho
 
+import com.qrakn.honcho.command.CPL
 import com.qrakn.honcho.command.CommandMeta
 import com.qrakn.honcho.command.adapter.CommandTypeAdapter
 import org.apache.commons.lang.StringUtils
 import org.bukkit.Bukkit
+import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandMap
@@ -36,7 +38,12 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
             commands[label] = binding
 
             if (commandMap.getCommand(label) == null) {
-                commandMap.register(honcho.plugin.name, HonchoCommand(label, this))
+                val honchoCommand = HonchoCommand(label, this)
+
+                honchoCommand.usage = getCommandUsage(label)
+                honchoCommand.description = meta.description
+
+                commandMap.register(honcho.plugin.name, honchoCommand)
             }
         }
 
@@ -111,6 +118,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
             return true
         }
 
+        sender.sendMessage("${ChatColor.RED}Usage: ${command.usage}") // todo: make configurable
         return false
     }
 
@@ -132,6 +140,43 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
         throw NullPointerException()
     }
 
+    //TODO: redo this so that every method gets its own usage
+    internal fun getCommandUsage(label: String): String {
+        val command = commands[label]!!
+        val builder = StringBuilder("/").append(label)
+        val arguments: MutableMap<Int, CommandArguments> = HashMap()
+
+        for (method in command.methods) {
+            val parameters = method.parameters
+
+            for (i in 1 until parameters.size) {
+                val argument = arguments.getOrDefault(i-1, CommandArguments(arrayListOf()))
+                val parameter = parameters[i]
+
+                val name: String = if (parameter.isAnnotationPresent(CPL::class.java)) {
+                    parameter.getAnnotation(CPL::class.java).value
+                } else {
+                    parameter.name
+                }
+
+                if (!(argument.arguments.contains(name))) {
+                    argument.arguments.add(name)
+                    arguments[i - 1] = argument
+                }
+            }
+
+        }
+
+        for (index in 0 until arguments.size) {
+            val argument = arguments[index]
+
+            builder.append(" <").append(StringUtils.join(argument?.arguments, "/")).append(">")
+        }
+
+        return builder.toString()
+    }
+
+    private inner class CommandArguments(val arguments: MutableList<String>)
     internal inner class CommandBinding(val methods: Array<Method>, val command: Any)
 
 }
