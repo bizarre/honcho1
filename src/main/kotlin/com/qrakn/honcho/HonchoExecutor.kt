@@ -81,7 +81,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
                     }
 
                     if (method.parameterCount - 1 != args.size) {
-                        if (args.size - method.parameterCount > args.size - other.parameterCount) {
+                        if (method.parameterCount < other.parameterCount) {
                             continue@outer
                         }
                     }
