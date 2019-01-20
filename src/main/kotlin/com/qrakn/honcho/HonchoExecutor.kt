@@ -13,9 +13,11 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.plugin.PluginManager
 import org.bukkit.plugin.SimplePluginManager
-import java.lang.NullPointerException
+import org.bukkit.scheduler.BukkitRunnable
 import java.lang.reflect.Method
 import java.util.HashMap
+import kotlin.collections.ArrayList
+import kotlin.collections.set
 
 internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
 
@@ -60,7 +62,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
         val instance = binding.command
 
         if (meta.permission.isNotEmpty() && !sender.hasPermission(meta.permission)) {
-            sender.sendMessage("Nope.") // TODO send configurable no permission message (make command specific or impl specific?)
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', meta.permissionMessage))
             return true
         }
 
@@ -112,7 +114,17 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
             }
 
             if (arguments.size == parameters.size) {
-                method.invoke(instance, *arguments.toTypedArray())
+                if (meta.async) {
+                    object : BukkitRunnable() {
+
+                        override fun run() {
+                            method.invoke(instance, *arguments.toTypedArray())
+                        }
+
+                    }.runTaskAsynchronously(honcho.plugin)
+                } else {
+                    method.invoke(instance, *arguments.toTypedArray())
+                }
             }
 
             return true
