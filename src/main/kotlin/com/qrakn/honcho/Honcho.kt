@@ -1,8 +1,10 @@
 package com.qrakn.honcho
 
 import com.qrakn.honcho.command.adapter.CommandTypeAdapter
-import com.qrakn.honcho.command.adapter.impl.PlayerTypeAdapter
-import com.qrakn.honcho.command.adapter.impl.StringTypeAdapter
+import com.qrakn.honcho.command.adapter.impl.*
+import org.bukkit.GameMode
+import org.bukkit.OfflinePlayer
+import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -11,8 +13,13 @@ class Honcho(val plugin: JavaPlugin) {
     private val executor: HonchoExecutor = HonchoExecutor(this)
 
     init {
+        registerTypeAdapter(Boolean::class.java, BooleanTypeAdapter())
+        registerTypeAdapter(GameMode::class.java, GameModeTypeAdapter())
+        registerTypeAdapter(Integer::class.java, IntegerTypeAdapter())
+        registerTypeAdapter(OfflinePlayer::class.java, OfflinePlayerTypeAdapter())
         registerTypeAdapter(String::class.java, StringTypeAdapter())
         registerTypeAdapter(Player::class.java, PlayerTypeAdapter())
+        registerTypeAdapter(World::class.java, WorldTypeAdapter())
     }
 
     fun registerCommand(command: Any) {
