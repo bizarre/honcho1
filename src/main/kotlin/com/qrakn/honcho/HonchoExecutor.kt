@@ -141,7 +141,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
     }
 
     //TODO: redo this so that every method gets its own usage
-    internal fun getCommandUsage(label: String): String {
+    private fun getCommandUsage(label: String): String {
         val command = commands[label]!!
         val builder = StringBuilder("/").append(label)
         val arguments: MutableMap<Int, CommandArguments> = HashMap()

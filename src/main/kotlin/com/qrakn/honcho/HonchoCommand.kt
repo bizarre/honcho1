@@ -49,7 +49,9 @@ internal class HonchoCommand(label: String, private val executor: HonchoExecutor
             }
         }
 
-        return executor.execute(sender, this, label.toLowerCase(), args)
+        val correctArguments = ArrayList<String>(args.toMutableList().subList(label.split(' ').size-1, args.size))
+
+        return executor.execute(sender, this, label.toLowerCase(), correctArguments.toTypedArray())
     }
 
 }
