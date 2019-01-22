@@ -2,6 +2,7 @@ package com.qrakn.honcho
 
 import com.qrakn.honcho.command.adapter.CommandTypeAdapter
 import com.qrakn.honcho.command.adapter.impl.*
+import org.bukkit.ChatColor
 import org.bukkit.GameMode
 import org.bukkit.OfflinePlayer
 import org.bukkit.World
@@ -11,6 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin
 class Honcho(val plugin: JavaPlugin) {
 
     private val executor: HonchoExecutor = HonchoExecutor(this)
+    var permissionMessage: String = "&cYou don't have permission to use this command"
 
     init {
         registerTypeAdapter(Boolean::class.java, BooleanTypeAdapter())
