@@ -105,14 +105,14 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
                 translation = if (i == parameters.lastIndex) {
                     adapter.convert(StringUtils.join(args, " ", i - 1, args.size), parameter.type)
                 } else {
-                    val convert = adapter.convert(args[i - 1], parameter.type)
+                    adapter.convert(args[i - 1], parameter.type)
+                }
 
-                    if (convert == null) {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', adapter.getUsageMessage(args[i - 1])))
-                        return true
-                    } else {
-                        //Idk how to remove this
-                    }
+                if (translation == null) {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', adapter.getUsageMessage(args[i - 1])))
+                    return true
+                } else {
+                    //Idk how to remove this
                 }
 
                 arguments.add(translation)
