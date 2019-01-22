@@ -102,9 +102,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
             for (i in 1 until parameters.size) {
                 val parameter = parameters[i]
                 val adapter = adapters[parameter.type]!!
-                if (parameter == null) {
-                    Bukkit.broadcastMessage("test")
-                }
+
                 val translation: Any?
                 translation = if (i == parameters.lastIndex) {
                     adapter.convert(StringUtils.join(args, " ", i - 1, args.size), parameter.type)
