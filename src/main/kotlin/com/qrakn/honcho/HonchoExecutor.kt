@@ -60,7 +60,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
         val instance = binding.command
 
         if (meta.permission.isNotEmpty() && !sender.hasPermission(meta.permission)) {
-            sender.sendMessage("Nope.") // TODO send configurable no permission message (make command specific or impl specific?)
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', meta.permission))
             return true
         }
 
@@ -105,7 +105,14 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
                 translation = if (i == parameters.lastIndex) {
                     adapter.convert(StringUtils.join(args, " ", i - 1, args.size), parameter.type)
                 } else {
-                    adapter.convert(args[i - 1], parameter.type)
+                    val convert = adapter.convert(args[i - 1], parameter.type)
+
+                    if (convert == null) {
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', adapter.getUsageMessage(args[i - 1])))
+                        return true
+                    } else {
+
+                    }
                 }
 
                 arguments.add(translation)
@@ -118,7 +125,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
             return true
         }
 
-        sender.sendMessage("${ChatColor.RED}Usage: ${command.usage}") // todo: make configurable
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', meta.usage))
         return false
     }
 

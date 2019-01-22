@@ -1,5 +1,7 @@
 package com.qrakn.honcho.command
 
+import org.bukkit.ChatColor
+
 /**
  * Defines a class as a command.
  *
@@ -13,4 +15,6 @@ annotation class CommandMeta(
         vararg val label: String,
         val permission: String = "",
         val description: String = "",
-        val subcommands: Boolean = false)
+        val subcommands: Boolean = false,
+        val usage: String = "§cInvalid Usage: /command <Args>",
+        val permissionMessage: String = "§cYou do not have permission to perform this command.")
