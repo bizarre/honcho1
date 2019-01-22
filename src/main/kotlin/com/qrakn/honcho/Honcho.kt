@@ -14,7 +14,7 @@ class Honcho(val plugin: JavaPlugin) {
         registerTypeAdapter(String::class.java, StringTypeAdapter())
         registerTypeAdapter(Player::class.java, PlayerTypeAdapter())
     }
-
+  
     fun registerCommand(command: Any) {
         executor.registerCommand(command)
     }
