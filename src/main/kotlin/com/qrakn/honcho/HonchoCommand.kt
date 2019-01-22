@@ -53,5 +53,4 @@ internal class HonchoCommand(label: String, private val executor: HonchoExecutor
 
         return executor.execute(sender, this, label.toLowerCase(), correctArguments.toTypedArray())
     }
-
 }
