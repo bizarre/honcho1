@@ -116,7 +116,10 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
 
                     if (arguments.size == parameters.size) {
                         method.invoke(instance, *arguments.toTypedArray())
+                        return
                     }
+
+                    sender.sendMessage("${ChatColor.RED}Usage: ${command.usage}") // todo: make configurable
                 }
             }
         }
@@ -126,8 +129,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
         } else {
             runnable.runTask(honcho.plugin)
         }
-
-        sender.sendMessage("${ChatColor.RED}Usage: ${command.usage}") // todo: make configurable
+        
         return true
     }
 
