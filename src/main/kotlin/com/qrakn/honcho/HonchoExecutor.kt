@@ -66,69 +66,69 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
         }
 
         // TODO: optimize
-        outer@ for (method in binding.methods) {
-            val parameters = method.parameters
+        val runnable = object : BukkitRunnable() {
+            override fun run() {
+                outer@ for (method in binding.methods) {
+                    val parameters = method.parameters
 
-            if (parameters[0].type is Player && sender !is Player) continue
-            if (method.declaringClass != instance.javaClass) continue
+                    if (parameters[0].type is Player && sender !is Player) continue
+                    if (method.declaringClass != instance.javaClass) continue
 
-            if (method.parameterCount - 1 > args.size) {
-                continue
-            }
+                    if (method.parameterCount - 1 > args.size) {
+                        continue
+                    }
 
-            /**
-             * Prioritizes the method that is exact type of sender + lowest argument count
-             */
-            for (other in binding.methods) {
-                if (other != method) {
+                    /**
+                     * Prioritizes the method that is exact type of sender + lowest argument count
+                     */
+                    for (other in binding.methods) {
+                        if (other != method) {
 
-                    if (method.parameterCount == other.parameterCount) {
-                        if (parameters[0].type is CommandSender && sender is Player && other.parameters[0].type is Player) {
-                            continue@outer
+                            if (method.parameterCount == other.parameterCount) {
+                                if (parameters[0].type is CommandSender && sender is Player && other.parameters[0].type is Player) {
+                                    continue@outer
+                                }
+                            }
+
+                            if (method.parameterCount - 1 != args.size) {
+                                if (method.parameterCount < other.parameterCount) {
+                                    continue@outer
+                                }
+                            }
+
                         }
                     }
 
-                    if (method.parameterCount - 1 != args.size) {
-                        if (method.parameterCount < other.parameterCount) {
-                            continue@outer
+                    val arguments: MutableList<Any?> = arrayListOf(sender)
+                    for (i in 1 until parameters.size) {
+                        val parameter = parameters[i]
+                        val adapter = adapters[parameter.type]!!
+
+                        val translation: Any?
+                        translation = if (i == parameters.lastIndex) {
+                            adapter.convert(StringUtils.join(args, " ", i - 1, args.size), parameter.type)
+                        } else {
+                            adapter.convert(args[i - 1], parameter.type)
                         }
+
+                        arguments.add(translation)
                     }
 
+                    if (arguments.size == parameters.size) {
+                        method.invoke(instance, *arguments.toTypedArray())
+                    }
                 }
             }
+        }
 
-            val arguments: MutableList<Any?> = arrayListOf(sender)
-            for (i in 1 until parameters.size) {
-                val parameter = parameters[i]
-                val adapter = adapters[parameter.type]!!
-
-                val translation: Any?
-                translation = if (i == parameters.lastIndex) {
-                    adapter.convert(StringUtils.join(args, " ", i - 1, args.size), parameter.type)
-                } else {
-                    adapter.convert(args[i - 1], parameter.type)
-                }
-
-                arguments.add(translation)
-            }
-
-            if (arguments.size == parameters.size) {
-                if (meta.async) {
-                    object: BukkitRunnable() {
-                        override fun run() {
-                            method.invoke(instance, *arguments.toTypedArray())
-                        }
-                    }.runTaskAsynchronously(honcho.plugin)
-                } else {
-                    method.invoke(instance, *arguments.toTypedArray())
-                }
-            }
-
-            return true
+        if (meta.async) {
+            runnable.runTaskAsynchronously(honcho.plugin)
+        } else {
+            runnable.runTask(honcho.plugin)
         }
 
         sender.sendMessage("${ChatColor.RED}Usage: ${command.usage}") // todo: make configurable
-        return false
+        return true
     }
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
@@ -159,7 +159,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
             val parameters = method.parameters
 
             for (i in 1 until parameters.size) {
-                val argument = arguments.getOrDefault(i-1, CommandArguments(arrayListOf()))
+                val argument = arguments.getOrDefault(i - 1, CommandArguments(arrayListOf()))
                 val parameter = parameters[i]
 
                 val name: String = if (parameter.isAnnotationPresent(CPL::class.java)) {
