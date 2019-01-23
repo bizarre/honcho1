@@ -13,6 +13,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.plugin.PluginManager
 import org.bukkit.plugin.SimplePluginManager
+import org.bukkit.scheduler.BukkitRunnable
 import java.lang.NullPointerException
 import java.lang.reflect.Method
 import java.util.HashMap
@@ -112,7 +113,15 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
             }
 
             if (arguments.size == parameters.size) {
-                method.invoke(instance, *arguments.toTypedArray())
+                if (meta.async) {
+                    object: BukkitRunnable() {
+                        override fun run() {
+                            method.invoke(instance, *arguments.toTypedArray())
+                        }
+                    }.runTaskAsynchronously(honcho.plugin)
+                } else {
+                    method.invoke(instance, *arguments.toTypedArray())
+                }
             }
 
             return true

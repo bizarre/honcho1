@@ -13,4 +13,5 @@ annotation class CommandMeta(
         vararg val label: String,
         val permission: String = "",
         val description: String = "",
-        val subcommands: Boolean = false)
+        val subcommands: Boolean = false,
+        val async: Boolean = false)

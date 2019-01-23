@@ -6,6 +6,6 @@ package com.qrakn.honcho.command
  *
  * @param value the label of the parameter
  */
-@Target(AnnotationTarget.CLASS)
+@Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class CPL(val value: String)
