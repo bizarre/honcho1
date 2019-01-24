@@ -29,7 +29,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
 
         val methods: MutableList<Method> = ArrayList()
         for (method in command::class.java.declaredMethods) {
-            if (method.parameters.isNotEmpty() && method.parameters[0].type.isAssignableFrom(CommandSender::class.java)) {
+            if (method.parameters.isNotEmpty() && method.parameters[0].type.isAssignableFrom(Player::class.java)) {
                 methods.add(method)
             }
         }
@@ -118,9 +118,9 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
                         method.invoke(instance, *arguments.toTypedArray())
                         return
                     }
-
-                    sender.sendMessage("${ChatColor.RED}Usage: ${command.usage}") // todo: make configurable
                 }
+
+                sender.sendMessage("${ChatColor.RED}Usage: ${command.usage}") // todo: make configurable
             }
         }
 
@@ -129,7 +129,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
         } else {
             runnable.runTask(honcho.plugin)
         }
-        
+
         return true
     }
 
