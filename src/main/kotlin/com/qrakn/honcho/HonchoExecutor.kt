@@ -28,14 +28,13 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
         val meta: CommandMeta = command::class.java.getAnnotation(CommandMeta::class.java)!!
 
         val methods: MutableList<Method> = ArrayList()
-        for (method in command::class.java.declaredMethods) {
-            if (method.parameters.isNotEmpty() && method.parameters[0].type.isAssignableFrom(Player::class.java)) {
-                methods.add(method)
-            }
-        }
+
+        command::class.java.declaredMethods
+                .filter { method ->  method.parameters.isNotEmpty() && method.parameters[0].type.isAssignableFrom(Player::class.java)}
+                .forEach { method -> methods.add(method) }
 
         val binding = CommandBinding(methods.toTypedArray(), command)
-        for (label in HonchoCommand.getHierarchicalLabel(command.javaClass, ArrayList())) {
+        HonchoCommand.getHierarchicalLabel(command.javaClass, ArrayList()).forEach { label ->
             commands[label] = binding
 
             if (commandMap.getCommand(label) == null) {
@@ -49,7 +48,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
         }
 
         if (meta.subcommands) {
-            for (clazz in command::class.java.declaredClasses) {
+            command::class.java.declaredClasses.forEach { clazz ->
                 registerCommand(clazz.getDeclaredConstructor(command::class.java).newInstance(command))
             }
         }
@@ -157,7 +156,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
         val builder = StringBuilder("/").append(label)
         val arguments: MutableMap<Int, CommandArguments> = HashMap()
 
-        for (method in command.methods) {
+        command.methods.forEach { method ->
             val parameters = method.parameters
 
             for (i in 1 until parameters.size) {
@@ -170,12 +169,11 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
                     parameter.name
                 }
 
-                if (!(argument.arguments.contains(name))) {
+                if (!argument.arguments.contains(name)) {
                     argument.arguments.add(name)
                     arguments[i - 1] = argument
                 }
             }
-
         }
 
         for (index in 0 until arguments.size) {
