@@ -3,12 +3,19 @@ package com.qrakn.honcho
 import com.qrakn.honcho.command.adapter.CommandTypeAdapter
 import com.qrakn.honcho.command.adapter.impl.PlayerTypeAdapter
 import com.qrakn.honcho.command.adapter.impl.StringTypeAdapter
+import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
+import org.omg.CORBA.NO_PERMISSION
 
 class Honcho(val plugin: JavaPlugin) {
 
     private val executor: HonchoExecutor = HonchoExecutor(this)
+
+    companion object {
+        var noPermission: String = "${ChatColor.RED}Insufficient permission."
+        var commandUsage: String = "${ChatColor.RED}Usage: {usage}"
+    }
 
     init {
         registerTypeAdapter(String::class.java, StringTypeAdapter())
@@ -31,6 +38,14 @@ class Honcho(val plugin: JavaPlugin) {
      */
     fun registerTypeAdapter(clazz: Class<out Any>, adapter: CommandTypeAdapter) {
         executor.adapters.putIfAbsent(clazz, adapter)
+    }
+
+    fun setPermissionMessage(value: String){
+        noPermission = value
+    }
+
+    fun setUsageMessage(value: String){
+        commandUsage = value
     }
 
 }
