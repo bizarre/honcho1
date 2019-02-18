@@ -61,7 +61,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
         val instance = binding.command
 
         if (meta.permission.isNotEmpty() && !sender.hasPermission(meta.permission)) {
-            sender.sendMessage("Nope.") // TODO send configurable no permission message (make command specific or impl specific?)
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', meta.permissionMessage))
             return true
         }
 

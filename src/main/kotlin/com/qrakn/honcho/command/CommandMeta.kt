@@ -12,6 +12,7 @@ package com.qrakn.honcho.command
 annotation class CommandMeta(
         vararg val label: String,
         val permission: String = "",
+        val permissionMessage: String = "&cNo permission.",
         val description: String = "",
         val subcommands: Boolean = false,
         val async: Boolean = false)
