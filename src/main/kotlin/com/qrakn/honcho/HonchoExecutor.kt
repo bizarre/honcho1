@@ -114,9 +114,12 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
 
                         try {
                             val conversion = adapter.convert(input, parameter.type)
+
                             if (conversion == null && adapter is NonNullableCommandTypeAdapter) {
                                 throw NullPointerException()
                             }
+
+                            arguments.add(conversion)
                         } catch (exception: Exception) {
                             if (!adapter.onException(exception, sender, input)) { // if exception not handled by adapter
                                 sender.sendMessage("${ChatColor.RED}An error occurred (${exception.message}), please contact an administrator")
