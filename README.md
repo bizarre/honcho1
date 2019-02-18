@@ -44,7 +44,7 @@ and then add this to your maven project's dependencies:
 class BroadcastCommand {
 
   fun execute(sender: CommandSender, message: String) {
-    Bukkit.broadcastMessage("${ChatColor.AQUA}" + message);
+    Bukkit.broadcastMessage("${ChatColor.AQUA}$message");
   }
 
 }
