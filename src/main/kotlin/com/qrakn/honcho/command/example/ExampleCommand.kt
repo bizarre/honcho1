@@ -5,16 +5,10 @@ import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-@CommandMeta(label = ["example"], description = "Example command", subcommands = true)
+@CommandMeta(label = ["example"], description = "Example command", subcommands = true, usage = "/example <player>")
 open class ExampleCommand {
 
-    fun execute(sender: CommandSender, player: Player?) {
-
-        if (player == null) {
-            sender.sendMessage("${ChatColor.RED}Player not found.")
-            return
-        }
-
+    fun execute(sender: CommandSender, player: Player) {
         sender.sendMessage("You poked ${player.name}.")
 
         player.sendMessage("${sender.name} poked you.")
