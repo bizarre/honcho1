@@ -3,6 +3,7 @@ package com.qrakn.honcho
 import com.qrakn.honcho.command.CPL
 import com.qrakn.honcho.command.CommandMeta
 import com.qrakn.honcho.command.adapter.CommandTypeAdapter
+import com.qrakn.honcho.command.adapter.NonNullableCommandTypeAdapter
 import org.apache.commons.lang.StringUtils
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -14,6 +15,7 @@ import org.bukkit.entity.Player
 import org.bukkit.plugin.PluginManager
 import org.bukkit.plugin.SimplePluginManager
 import org.bukkit.scheduler.BukkitRunnable
+import java.lang.Exception
 import java.lang.NullPointerException
 import java.lang.reflect.Method
 import java.util.HashMap
@@ -104,14 +106,24 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
                         val parameter = parameters[i]
                         val adapter = adapters[parameter.type]!!
 
-                        val translation: Any?
-                        translation = if (i == parameters.lastIndex) {
-                            adapter.convert(StringUtils.join(args, " ", i - 1, args.size), parameter.type)
+                        val input = if (i == parameters.lastIndex) {
+                            StringUtils.join(args, " ", i - 1, args.size)
                         } else {
-                            adapter.convert(args[i - 1], parameter.type)
+                            args[i - 1]
                         }
 
-                        arguments.add(translation)
+                        try {
+                            val conversion = adapter.convert(input, parameter.type)
+                            if (conversion == null && adapter is NonNullableCommandTypeAdapter) {
+                                throw NullPointerException()
+                            }
+                        } catch (exception: Exception) {
+                            if (!adapter.onException(exception, sender, input)) { // if exception not handled by adapter
+                                sender.sendMessage("${ChatColor.RED}An error occurred (${exception.message}), please contact an administrator")
+                            }
+                            return
+                        }
+
                     }
 
                     if (arguments.size == parameters.size) {
