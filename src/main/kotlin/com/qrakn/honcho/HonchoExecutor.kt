@@ -120,7 +120,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
                     }
                 }
 
-                sender.sendMessage("${ChatColor.RED}Usage: ${command.usage}") // todo: make configurable
+                sender.sendMessage(Honcho.usage.replace("{usage}", meta.usage))
             }
         }
 

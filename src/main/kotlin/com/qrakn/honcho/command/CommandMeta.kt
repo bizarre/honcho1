@@ -14,5 +14,6 @@ annotation class CommandMeta(
         val permission: String = "",
         val permissionMessage: String = "&cNo permission.",
         val description: String = "",
+        val usage: String = "",
         val subcommands: Boolean = false,
         val async: Boolean = false)

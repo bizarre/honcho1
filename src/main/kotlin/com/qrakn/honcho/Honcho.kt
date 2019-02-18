@@ -3,12 +3,18 @@ package com.qrakn.honcho
 import com.qrakn.honcho.command.adapter.CommandTypeAdapter
 import com.qrakn.honcho.command.adapter.impl.PlayerTypeAdapter
 import com.qrakn.honcho.command.adapter.impl.StringTypeAdapter
+import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 
 class Honcho(val plugin: JavaPlugin) {
 
     private val executor: HonchoExecutor = HonchoExecutor(this)
+
+
+    companion object {
+        var usage: String = "${ChatColor.RED}Usage: {usage}"
+    }
 
     init {
         registerTypeAdapter(String::class.java, StringTypeAdapter())
@@ -33,4 +39,7 @@ class Honcho(val plugin: JavaPlugin) {
         executor.adapters.putIfAbsent(clazz, adapter)
     }
 
+    fun setUsage(message: String) {
+        usage = message
+    }
 }
