@@ -30,7 +30,7 @@ class Honcho(val plugin: JavaPlugin) {
      * @param adapter the command type adapter
      */
     fun registerTypeAdapter(clazz: Class<out Any>, adapter: CommandTypeAdapter) {
-        executor.adapters.putIfAbsent(clazz, adapter)
+        executor.adapters[clazz] = adapter
     }
 
 }
