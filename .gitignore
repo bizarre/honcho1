@@ -1,0 +1,8 @@
+.idea/
+target/
+out/
+bin/
+*.iml
+*.project
+*.classpath
+.DS_STORE
