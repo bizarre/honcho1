@@ -63,7 +63,13 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
         val instance = binding.command
 
         if (meta.permission.isNotEmpty() && !sender.hasPermission(meta.permission)) {
-            sender.sendMessage("Nope.") // TODO send configurable no permission message (make command specific or impl specific?)
+            var message = honcho.noPermissionMessage
+
+            if (meta.noPermissionMessage.isNotEmpty()) {
+                message = meta.noPermissionMessage
+            }
+
+            sender.sendMessage(message)
             return true
         }
 

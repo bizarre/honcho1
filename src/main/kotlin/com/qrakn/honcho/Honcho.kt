@@ -3,12 +3,14 @@ package com.qrakn.honcho
 import com.qrakn.honcho.command.adapter.CommandTypeAdapter
 import com.qrakn.honcho.command.adapter.impl.PlayerTypeAdapter
 import com.qrakn.honcho.command.adapter.impl.StringTypeAdapter
+import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 
 class Honcho(val plugin: JavaPlugin) {
 
     private val executor: HonchoExecutor = HonchoExecutor(this)
+    var noPermissionMessage = "${ChatColor.RED}You don't have permission to do this."
 
     init {
         registerTypeAdapter(String::class.java, StringTypeAdapter())
