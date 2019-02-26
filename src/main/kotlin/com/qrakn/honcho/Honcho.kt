@@ -15,6 +15,12 @@ class Honcho(val plugin: JavaPlugin) {
     var noPermissionMessage = "${ChatColor.RED}You don't have permission to do this."
 
     init {
+        registerTypeAdapter(Boolean::class.java, BooleanTypeAdapter())
+        registerTypeAdapter(ChatColor::class.java, ChatColorTypeAdapter())
+        registerTypeAdapter(Double::class.java, DoubleTypeAdapter())
+        registerTypeAdapter(GameMode::class.java, GameModeTypeAdapter())
+        registerTypeAdapter(Int::class.java, IntegerTypeAdapter())
+        registerTypeAdapter(OfflinePlayer::class.java, OfflinePlayerTypeAdapter())
         registerTypeAdapter(CommandOption::class.java, CommandOptionTypeAdapter())
         registerTypeAdapter(Player::class.java, PlayerTypeAdapter())
         registerTypeAdapter(String::class.java, StringTypeAdapter())
