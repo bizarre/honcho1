@@ -19,7 +19,7 @@ class Honcho(val plugin: JavaPlugin) {
         registerTypeAdapter(ChatColor::class.java, ChatColorTypeAdapter())
         registerTypeAdapter(Double::class.java, DoubleTypeAdapter())
         registerTypeAdapter(GameMode::class.java, GameModeTypeAdapter())
-        registerTypeAdapter(Integer::class.java, IntegerTypeAdapter())
+        registerTypeAdapter(Int::class.java, IntegerTypeAdapter())
         registerTypeAdapter(OfflinePlayer::class.java, OfflinePlayerTypeAdapter())
         registerTypeAdapter(CommandOption::class.java, CommandOptionTypeAdapter())
         registerTypeAdapter(Player::class.java, PlayerTypeAdapter())
