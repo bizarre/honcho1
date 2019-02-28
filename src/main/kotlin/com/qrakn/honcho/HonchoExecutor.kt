@@ -2,6 +2,7 @@ package com.qrakn.honcho
 
 import com.qrakn.honcho.command.CPL
 import com.qrakn.honcho.command.CommandMeta
+import com.qrakn.honcho.command.CommandOption
 import com.qrakn.honcho.command.adapter.CommandTypeAdapter
 import com.qrakn.honcho.command.adapter.NonNullableCommandTypeAdapter
 import org.apache.commons.lang.StringUtils
@@ -18,7 +19,7 @@ import org.bukkit.scheduler.BukkitRunnable
 import java.lang.Exception
 import java.lang.NullPointerException
 import java.lang.reflect.Method
-import java.util.HashMap
+import java.util.*
 
 internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
 
@@ -36,7 +37,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
             }
         }
 
-        val binding = CommandBinding(methods.toTypedArray(), command)
+        val binding = CommandBinding(methods.toTypedArray(), meta, command)
         for (label in HonchoCommand.getHierarchicalLabel(command.javaClass, ArrayList())) {
             commands[label] = binding
 
@@ -57,10 +58,11 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
         }
     }
 
-    fun execute(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
+    fun execute(sender: CommandSender, command: Command, label: String, args: Array<String?>): Boolean {
         val binding: CommandBinding = commands[label] ?: return false
         val meta = binding.command.javaClass.getAnnotation(CommandMeta::class.java)
         val instance = binding.command
+        var option = false
 
         if (meta.permission.isNotEmpty() && !sender.hasPermission(meta.permission)) {
             var message = honcho.noPermissionMessage
@@ -78,12 +80,22 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
             override fun run() {
                 outer@ for (method in binding.methods) {
                     val parameters = method.parameters
+                    var doContinue = true
 
                     if (parameters[0].type is Player && sender !is Player) continue
                     if (method.declaringClass != instance.javaClass) continue
 
                     if (method.parameterCount - 1 > args.size) {
-                        continue
+                        for(param in parameters) {
+                            if(param.type == CommandOption::class.java && method.parameterCount - 2 <= args.size) {
+                                doContinue = false
+                                break
+                            }
+                        }
+
+                        if(doContinue) {
+                            continue
+                        }
                     }
 
                     /**
@@ -119,15 +131,23 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
                         }
 
                         try {
-                            val conversion = adapter.convert(input, parameter.type)
+                            val conversion = adapter.convert(input!!, parameter.type)
 
                             if (conversion == null && adapter is NonNullableCommandTypeAdapter) {
                                 throw NullPointerException()
                             }
 
+                            if(conversion is CommandOption) {
+                                if(!meta.options.contains(conversion.tag.toLowerCase())) {
+                                    sender.sendMessage("${ChatColor.RED}Unrecognized command option '-${conversion.tag}'!")
+                                    sender.sendMessage("${ChatColor.RED}Usage: ${command.usage}")
+                                    return
+                                }
+                            }
+
                             arguments.add(conversion)
                         } catch (exception: Exception) {
-                            if (!adapter.onException(exception, sender, input)) { // if exception not handled by adapter
+                            if (!adapter.onException(exception, sender, input!!)) { // if exception not handled by adapter
                                 sender.sendMessage("${ChatColor.RED}An error occurred (${exception.message}), please contact an administrator")
                             }
                             return
@@ -154,7 +174,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
         return true
     }
 
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
+    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String?>): Boolean {
         return execute(sender, command, label, args)
     }
 
@@ -176,7 +196,19 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
     private fun getCommandUsage(label: String): String {
         val command = commands[label]!!
         val builder = StringBuilder("/").append(label)
-        val arguments: MutableMap<Int, CommandArguments> = HashMap()
+        val arguments: MutableMap<Int, CommandArguments?> = HashMap()
+
+        if(command.meta.options.isNotEmpty()) {
+            val options = ArrayList<String>()
+
+            command.meta.options.forEach {
+                options.add("-" + it.toLowerCase())
+            }
+
+            builder.append(" [")
+            builder.append(StringUtils.join(options, ","))
+            builder.append("]")
+        }
 
         for (method in command.methods) {
             val parameters = method.parameters
@@ -191,24 +223,31 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
                     parameter.name
                 }
 
-                if (!(argument.arguments.contains(name))) {
-                    argument.arguments.add(name)
-                    arguments[i - 1] = argument
+                if(parameter.type == CommandOption::class.java) {
+                    arguments[i - 1] = null
+                } else {
+                    if (argument != null) {
+                        if (!(argument.arguments.contains(name))) {
+                            argument.arguments.add(name)
+                            arguments[i - 1] = argument
+                        }
+                    }
                 }
             }
-
         }
 
         for (index in 0 until arguments.size) {
             val argument = arguments[index]
 
-            builder.append(" <").append(StringUtils.join(argument?.arguments, "/")).append(">")
+            if(argument != null) {
+                builder.append(" <").append(StringUtils.join(argument.arguments, "/")).append(">")
+            }
         }
 
         return builder.toString()
     }
 
     private inner class CommandArguments(val arguments: MutableList<String>)
-    internal inner class CommandBinding(val methods: Array<Method>, val command: Any)
+    internal inner class CommandBinding(val methods: Array<Method>, val meta: CommandMeta, val command: Any)
 
 }
