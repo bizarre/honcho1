@@ -1,6 +1,7 @@
 package com.qrakn.honcho
 
 import com.qrakn.honcho.command.adapter.CommandTypeAdapter
+import com.qrakn.honcho.command.adapter.impl.IntegerTypeAdapter
 import com.qrakn.honcho.command.adapter.impl.PlayerTypeAdapter
 import com.qrakn.honcho.command.adapter.impl.StringTypeAdapter
 import org.bukkit.ChatColor
@@ -15,6 +16,7 @@ class Honcho(val plugin: JavaPlugin) {
     init {
         registerTypeAdapter(String::class.java, StringTypeAdapter())
         registerTypeAdapter(Player::class.java, PlayerTypeAdapter())
+        registerTypeAdapter(Int::class.javaObjectType, IntegerTypeAdapter())
     }
 
     fun registerCommand(command: Any) {

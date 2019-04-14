@@ -18,4 +18,15 @@ class PlayerTypeAdapter : NonNullableCommandTypeAdapter {
 
         return false
     }
+
+    override fun onTabComplete(string: String): MutableList<String> {
+        val toReturn = ArrayList<String>()
+
+        Bukkit.getOnlinePlayers().filter { it.name.toLowerCase().startsWith(string.toLowerCase()) }.forEach {
+            toReturn.add(it.name)
+        }
+
+        return toReturn
+    }
+
 }
