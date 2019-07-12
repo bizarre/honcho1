@@ -56,7 +56,7 @@ internal class HonchoCommand(label: String, private val executor: HonchoExecutor
 
         val correctArguments = ArrayList<String>(args.toMutableList().subList(label.split(' ').size - 1, args.size))
 
-        return executor.execute(sender, this, label.toLowerCase(), correctArguments.toTypedArray())
+        return executor.execute(sender, executor.commandMap.getCommand(label), label.toLowerCase(), correctArguments.toTypedArray())
     }
 
     override fun tabComplete(sender: CommandSender, commandLabel: String, args: Array<out String>): MutableList<String> {

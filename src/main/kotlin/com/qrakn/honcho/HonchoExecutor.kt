@@ -1,5 +1,6 @@
 package com.qrakn.honcho
 
+import com.qrakn.honcho.command.CA
 import com.qrakn.honcho.command.CPL
 import com.qrakn.honcho.command.CommandMeta
 import com.qrakn.honcho.command.adapter.CommandTypeAdapter
@@ -24,7 +25,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
 
     internal val adapters: MutableMap<Class<out Any>, CommandTypeAdapter> = HashMap()
     internal val commands: MutableMap<String, CommandBinding> = HashMap()
-    private val commandMap: CommandMap = getCommandMap()
+    internal val commandMap: CommandMap = getCommandMap()
 
     fun registerCommand(command: Any) {
         val meta: CommandMeta = command::class.java.getAnnotation(CommandMeta::class.java)!!
@@ -76,11 +77,16 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
         // TODO: optimize
         val runnable = object : BukkitRunnable() {
             override fun run() {
+                var catchAll: Method? = null
                 outer@ for (method in binding.methods) {
                     val parameters = method.parameters
 
                     if (parameters[0].type is Player && sender !is Player) continue
                     if (method.declaringClass != instance.javaClass) continue
+
+                    if (method.isAnnotationPresent(CA::class.java) && method.parameterCount == 2 && method.parameterTypes.contains(Array<String>::class.java)) {
+                        catchAll = method
+                    }
 
                     if (method.parameterCount - 1 > args.size) {
                         continue
@@ -110,7 +116,7 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
                     val arguments: MutableList<Any?> = arrayListOf(sender)
                     for (i in 1 until parameters.size) {
                         val parameter = parameters[i]
-                        val adapter = adapters[parameter.type]!!
+                        val adapter = adapters[parameter.type]?: break
 
                         val input = if (i == parameters.lastIndex) {
                             StringUtils.join(args, " ", i - 1, args.size)
@@ -141,7 +147,11 @@ internal class HonchoExecutor(private val honcho: Honcho) : CommandExecutor {
                     }
                 }
 
-                sender.sendMessage("${ChatColor.RED}Usage: ${command.usage}") // todo: make configurable
+                if (catchAll != null) {
+                    catchAll.invoke(instance, sender, args)
+                } else {
+                    sender.sendMessage("${ChatColor.RED}Usage: ${command.usage}") // todo: make configurable
+                }
             }
         }
 
